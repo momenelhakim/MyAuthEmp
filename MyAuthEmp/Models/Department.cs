@@ -13,6 +13,7 @@ namespace MyAuthEmp.Models
 
         // One-to-One Relationship with Employee
         public int EmployeeId { get; set; } // Foreign key
+        [JsonIgnore]
         public Employee? Employee { get; set; } // Navigation property
     }
 }

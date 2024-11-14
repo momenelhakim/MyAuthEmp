@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace MyAuthEmp.Models
 {
@@ -16,7 +17,8 @@ namespace MyAuthEmp.Models
             // Foreign key for Employee
             public int EmployeeId { get; set; }
 
-            // Navigation property to link to Employee
+        // Navigation property to link to Employee
+        [JsonIgnore]
             public Employee? Employee { get; set; }
         }
  
