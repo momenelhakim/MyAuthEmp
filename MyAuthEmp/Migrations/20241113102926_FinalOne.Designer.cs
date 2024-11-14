@@ -12,8 +12,8 @@ using MyAuthEmp.Services;
 namespace MyAuthEmp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241110101657_MyAuthApp")]
-    partial class MyAuthApp
+    [Migration("20241113102926_FinalOne")]
+    partial class FinalOne
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -254,12 +254,12 @@ namespace MyAuthEmp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Salary")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -268,6 +268,36 @@ namespace MyAuthEmp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("MyAuthEmp.Models.Salary", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Gross")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Taxed")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("Salaries");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -332,10 +362,23 @@ namespace MyAuthEmp.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("MyAuthEmp.Models.Salary", b =>
+                {
+                    b.HasOne("MyAuthEmp.Models.Employee", "Employee")
+                        .WithMany("Salaries")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("MyAuthEmp.Models.Employee", b =>
                 {
                     b.Navigation("Department")
                         .IsRequired();
+
+                    b.Navigation("Salaries");
                 });
 #pragma warning restore 612, 618
         }

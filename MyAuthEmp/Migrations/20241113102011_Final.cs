@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MyAuthEmp.Migrations
 {
     /// <inheritdoc />
-    public partial class MyAuthApp : Migration
+    public partial class Final : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,18 +51,16 @@ namespace MyAuthEmp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Employees",
+                name: "DepartmentDto",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Salary = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    DepartmentName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Employees", x => x.Id);
+                    table.PrimaryKey("PK_DepartmentDto", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -172,6 +170,28 @@ namespace MyAuthEmp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Employees",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DepartmentDtoId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Employees", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Employees_DepartmentDto_DepartmentDtoId",
+                        column: x => x.DepartmentDtoId,
+                        principalTable: "DepartmentDto",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Departments",
                 columns: table => new
                 {
@@ -185,6 +205,29 @@ namespace MyAuthEmp.Migrations
                     table.PrimaryKey("PK_Departments", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Departments_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Salaries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Gross = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Taxed = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    EmployeeId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Salaries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Salaries_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
@@ -235,6 +278,16 @@ namespace MyAuthEmp.Migrations
                 table: "Departments",
                 column: "EmployeeId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Employees_DepartmentDtoId",
+                table: "Employees",
+                column: "DepartmentDtoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Salaries_EmployeeId",
+                table: "Salaries",
+                column: "EmployeeId");
         }
 
         /// <inheritdoc />
@@ -259,6 +312,9 @@ namespace MyAuthEmp.Migrations
                 name: "Departments");
 
             migrationBuilder.DropTable(
+                name: "Salaries");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
@@ -266,6 +322,9 @@ namespace MyAuthEmp.Migrations
 
             migrationBuilder.DropTable(
                 name: "Employees");
+
+            migrationBuilder.DropTable(
+                name: "DepartmentDto");
         }
     }
 }

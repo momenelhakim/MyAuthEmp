@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyAuthEmp.Services;
 
@@ -11,9 +12,11 @@ using MyAuthEmp.Services;
 namespace MyAuthEmp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241113102011_Final")]
+    partial class Final
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -243,6 +246,23 @@ namespace MyAuthEmp.Migrations
                     b.ToTable("Departments");
                 });
 
+            modelBuilder.Entity("MyAuthEmp.Models.DepartmentDto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DepartmentName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DepartmentDto");
+                });
+
             modelBuilder.Entity("MyAuthEmp.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
@@ -250,6 +270,9 @@ namespace MyAuthEmp.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DepartmentDtoId")
+                        .HasColumnType("int");
 
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
@@ -263,6 +286,8 @@ namespace MyAuthEmp.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentDtoId");
 
                     b.ToTable("Employees");
                 });
@@ -357,6 +382,17 @@ namespace MyAuthEmp.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("MyAuthEmp.Models.Employee", b =>
+                {
+                    b.HasOne("MyAuthEmp.Models.DepartmentDto", "DepartmentDto")
+                        .WithMany()
+                        .HasForeignKey("DepartmentDtoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DepartmentDto");
                 });
 
             modelBuilder.Entity("MyAuthEmp.Models.Salary", b =>

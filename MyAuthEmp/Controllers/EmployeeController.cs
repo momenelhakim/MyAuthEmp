@@ -17,7 +17,7 @@ namespace MyAuthEmp.Controllers
             _employeeServices = employeeServices;
         }
         [HttpGet]
-
+    
         public async Task<ActionResult<List<EmployeeDto>>> GetAll(int pageNumber, int pageSize)
         {
             var employees = await _employeeServices.GetAllAsync(pageNumber, pageSize);
@@ -26,7 +26,7 @@ namespace MyAuthEmp.Controllers
 
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Policy = "RequireAdminRole")]
         public async Task<ActionResult<EmployeeDto>> Get(int id)
         {
             var employee = await _employeeServices.GetAsync(id);
@@ -37,17 +37,17 @@ namespace MyAuthEmp.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<Employee>> Create(Employee employee)
+        public async Task<ActionResult<Employee>> Create(Employee employee   )
         {
 
             await _employeeServices.AddAsync(employee);
 
 
-            return CreatedAtAction(nameof(Get), new { id = employee.Id }, employee);
+            return CreatedAtAction(nameof(Get), new { id = employee.EmployeeId }, employee);
         }
 
+
         [HttpPut("{id}")]
-        [Authorize(policy: "RequireAdminRole")]
         public async Task<ActionResult<EmployeeDto>> Update(int id, EmployeeDto employeeDto)
         {
 
