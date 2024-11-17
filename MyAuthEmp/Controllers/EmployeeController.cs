@@ -26,7 +26,7 @@ namespace MyAuthEmp.Controllers
 
 
         [HttpGet("{id}")]
-        [Authorize(Policy = "RequireAdminRole")]
+      
         public async Task<ActionResult<EmployeeDto>> Get(int id)
         {
             var employee = await _employeeServices.GetAsync(id);

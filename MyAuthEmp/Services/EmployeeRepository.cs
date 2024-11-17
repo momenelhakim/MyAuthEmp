@@ -30,7 +30,7 @@ namespace MyAuthEmp.Services
                           Id = e.EmployeeId,
                           Name = e.Name,
                           DepartmentName = e.Department != null ? e.Department.DepartmentName : null,
-                          Salaries = e.Salaries.Select(s => new SalaryDto 
+                          Salaries = e.Salaries.Select(s => new Salary 
                           {
                               Amount = s.Amount,
                               Gross = s.Gross,
@@ -60,7 +60,7 @@ namespace MyAuthEmp.Services
                 Name = e.Name,
                 DepartmentName = e.Department != null ? e.Department.DepartmentName : null,
 
-                Salaries = e.Salaries.Select(s => new SalaryDto
+                Salaries = e.Salaries.Select(s => new Salary
                 {
                     Amount = s.Amount,
                     Gross = s.Gross,
@@ -90,27 +90,29 @@ namespace MyAuthEmp.Services
             var addedEmployee = await _context.Employees
                 .Include(e => e.Department)
                 .Include(e => e.Salaries)
-                .FirstOrDefaultAsync(e => e.EmployeeId == employee.EmployeeId);
+                 .FirstOrDefaultAsync(e => e.EmployeeId == e.Department.EmployeeId && e.Salaries.Any(s => s.EmployeeId == employee.EmployeeId)&& e.Id==e.EmployeeId);
+               
 
             return addedEmployee;
         }
 
 
 
-        public async Task<EmployeeDto> UpdateAsync(EmployeeDto employeeDto)
+        public async Task<EmployeeDto> UpdateAsync(int id, EmployeeDto employeeDto)
         {
-            // Retrieve the existing employee with their department.
+            
             var existingEmployee = await _context.Employees
-                .Include(e => e.Department) // Assuming the entity property is named "Department"
-                .FirstOrDefaultAsync(e => e.EmployeeId == employeeDto.Id);
+                .Include(e => e.Department)
+                .Include(e => e.Salaries)
+                .FirstOrDefaultAsync(e => e.EmployeeId == id);
 
             if (existingEmployee == null)
                 return null;
 
-            // Update employee properties
+            
             existingEmployee.Name = employeeDto.Name;
 
-            // Update department if needed
+         
             if (!string.IsNullOrEmpty(employeeDto.DepartmentName))
             {
                 var department = await _context.Departments
@@ -118,22 +120,50 @@ namespace MyAuthEmp.Services
 
                 if (department == null)
                 {
-                    // Create a new Department if it doesn't exist
+                   
                     department = new Department { DepartmentName = employeeDto.DepartmentName };
                     await _context.Departments.AddAsync(department);
                     await _context.SaveChangesAsync();
                 }
 
-                // Assign the department to the employee
+             
                 existingEmployee.Department = department;
             }
 
+            foreach (var newSalary in employeeDto.Salaries)
+            {
+                
+                var existingSalary = existingEmployee.Salaries
+                    .FirstOrDefault(s => s.EmployeeId == newSalary.EmployeeId);
+
+                if (existingSalary != null)
+                {
+               
+                    existingSalary.Amount = newSalary.Amount;
+                   existingSalary.Balance= newSalary.Balance;
+                    existingSalary.Gross = newSalary.Gross;
+                    existingSalary.Taxed  = newSalary.Taxed;
+                }
+                else
+                {
+                    
+                    existingEmployee.Salaries.Add(new Salary
+                    {
+                        EmployeeId = existingEmployee.EmployeeId,
+                        Amount = newSalary.Amount,
+                        Balance = newSalary.Balance,
+                        Gross = newSalary.Gross,
+                        Taxed = newSalary.Taxed,
+                    });
+                }
+            }
+            existingEmployee.Salaries= employeeDto.Salaries;
             await _context.SaveChangesAsync();
 
-            // Map the updated Employee entity to EmployeeDto
+            
             var result = _mapper.Map<EmployeeDto>(existingEmployee);
 
-            // Map DepartmentName if it exists
+         
             if (result.DepartmentName == null && existingEmployee.Department != null)
             {
                 result.DepartmentName = existingEmployee.Department.DepartmentName;
@@ -143,20 +173,28 @@ namespace MyAuthEmp.Services
         }
 
 
-        public async Task<EmployeeDto> DeleteAsync(int id)
+
+        public async Task<Employee> DeleteAsync(int id)
         {
+          
             var existingEmployee = await _context.Employees
                 .Include(e => e.Department)
-                .Include(e=>e.Salaries)
+                .Include(e => e.Salaries)
                 .FirstOrDefaultAsync(e => e.EmployeeId == id);
 
             if (existingEmployee == null)
                 return null;
 
+        
+            _context.Salaries.RemoveRange(existingEmployee.Salaries);
+
+            existingEmployee.Department = null;
+
+            // Remove the employee
             _context.Employees.Remove(existingEmployee);
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<EmployeeDto>(existingEmployee);
+            return existingEmployee;
         }
     }
 }

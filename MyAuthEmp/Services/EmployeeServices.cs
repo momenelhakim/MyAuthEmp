@@ -3,8 +3,8 @@ using MyAuthEmp.Models;
 
 namespace MyAuthEmp.Services
 {
-    
-   public class EmployeeServices
+
+    public class EmployeeServices
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IMapper _mapper;
@@ -30,31 +30,25 @@ namespace MyAuthEmp.Services
         }
 
 
-        public async Task AddAsync(Employee employee )
+        public async Task AddAsync(Employee employee)
         {
 
 
             await _employeeRepository.AddAsync(employee);
         }
 
-        public async Task<EmployeeDto> UpdateAsync(int id, EmployeeDto employeeDto)
+        public async Task<EmployeeDto> UpdateAsync(int Id, EmployeeDto employeeDto)
         {
-            if (id != employeeDto.Id)
-            {
-                return null;
-            }
 
-            var updatedEmployee = await _employeeRepository.UpdateAsync(employeeDto);
-            if (updatedEmployee != null)
-                return null;
+            var updatedEmployee = await _employeeRepository.UpdateAsync(Id, employeeDto);
 
             return updatedEmployee;
         }
 
-        public async Task<EmployeeDto> DeleteAsync(int id)
+        public async Task<Employee> DeleteAsync(int id)
         {
             var deletedEmployee = await _employeeRepository.DeleteAsync(id);
-            return deletedEmployee == null ? null : _mapper.Map<EmployeeDto>(deletedEmployee);
+            return deletedEmployee;
         }
     }
 }

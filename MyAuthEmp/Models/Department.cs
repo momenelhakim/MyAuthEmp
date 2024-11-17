@@ -8,11 +8,14 @@ namespace MyAuthEmp.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [JsonIgnore]
         public int Id { get; set; }
         public string DepartmentName { get; set; }
 
         // One-to-One Relationship with Employee
-        public int EmployeeId { get; set; } // Foreign key
+        [JsonIgnore]
+        
+        public int? EmployeeId { get; set; } // Foreign key
         [JsonIgnore]
         public Employee? Employee { get; set; } // Navigation property
     }
